@@ -1,0 +1,124 @@
+/* Mobile First  */
+.login {
+    display: grid;
+    place-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: var(--primary-color);
+}
+
+.login__container {
+    width: 90%;  
+    display: grid;
+    place-items: center;
+}
+
+.login__about {
+    display: none; 
+}
+
+.login__box {
+    padding: 20px;
+    max-width: 400px; /* Toàn bộ chiều rộng của phần tử chứa */
+    width: 100%;
+    text-align: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); /* Giảm kích thước bóng để phù hợp với màn hình nhỏ */
+}
+
+.login__image {
+    object-fit: contain;
+    height: 80px; /* Điều chỉnh kích thước hình ảnh cho điện thoại di động */
+}
+
+.login__text {
+    margin-bottom: 15px;
+    margin-top: 15px;
+}
+
+.login__input {
+    margin-bottom: 10px;
+}
+@media screen and (min-width: 768px) and (max-width: 1199px) {
+    .login__container {
+        width: 80%; 
+        grid-template-columns: 6fr 6fr; 
+        gap: 10px;
+    }
+
+    .login__about {
+        display: flex;
+        flex-direction: column;
+        /* align-items: center; */
+        color: #25D366;
+    }
+
+    .login__about__title {
+        font-size: 48px; /* Giảm kích thước chữ cho tablet */
+        margin-bottom: 12px;
+        
+    }
+    .login__about__content{
+        font-size: 20px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .login__box {
+        padding: 30px;
+    }
+
+    .login__image {
+        height: 90px; /* Tăng kích thước hình ảnh cho tablet */
+    }
+
+    .login__text {
+        margin-bottom: 18px;
+        margin-top: 18px;
+    }
+
+    .login__input {
+        margin-bottom: 12px;
+    }
+}
+
+@media screen and (min-width: 1200px) {
+    .login__container {
+        width: 80%;
+        grid-template-columns: 8fr 4fr; 
+        gap:20px;
+    }
+
+    .login__about {
+        display: flex;
+        flex-direction: column;
+        color: #25D366;
+    }
+
+    .login__about__title {
+        font-size: 64px; /* Giảm kích thước chữ cho tablet */
+        margin-bottom: 12px;
+        
+    }
+    .login__about__content{
+        font-size: 24px;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .login__box {
+        padding: 40px;
+    }
+
+    .login__image {
+        height: 100px; /* Kích thước hình ảnh lớn hơn cho máy tính */
+    }
+
+    .login__text {
+        margin-bottom: 20px;
+        margin-top: 20px;
+    }
+
+    
+}

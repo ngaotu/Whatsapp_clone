@@ -1,24 +1,48 @@
-import logo from './logo.svg';
+import SideBar from './components/SideBar/SideBar';
+import Chats from './components/Chats/Chats';
+import Login from './components/Login/Login';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom'
+import { useEffect, useState } from 'react';
+import { useStateValue } from './components/StateProvider';
+import { actionTypes } from './components/reducer';
 import './App.css';
-
 function App() {
+  const [{user}, dispatch] = useStateValue();
+  useEffect(() =>{
+    const userData = localStorage.getItem('user');
+    if(userData) {
+      dispatch({
+        type: actionTypes.SET_USER,
+        user: JSON.parse(userData),
+      });
+    }
+  }, [dispatch])
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="app">
+        {!user ? (
+          <Login/>
+        ) : (
+          <div className='app_body'>
+            <Routes>
+              <Route  path='/'  element= {
+                <>
+                  <SideBar />
+                  <Chats />
+                </>
+              }/> 
+              <Route  path='/chat/:userId'  element= {
+                <>
+                  <SideBar />
+                  <Chats />
+                </>
+              }/>        
+            </Routes>
+          </div>
+        )}
+      </div>
+
+    </Router>
   );
 }
 
