@@ -2,6 +2,7 @@
     /* background-color: aqua; */
     display: flex;
     flex-direction: column;
+    position: relative;
 }
 .chats__header{
     display: flex;
@@ -24,8 +25,17 @@
     background-repeat: repeat;
     background-position: center;
     padding: 30px;
-    overflow-y: scroll;
+    max-height: 650px;
+    overflow-y: auto;
 }
+.emoji-picker {
+    position: absolute;
+    bottom: 100px; 
+    left: 15px; 
+    border: 1px solid lightgray;
+}
+
+
 .chats__message{
     display: flex;
     align-items: center;
@@ -61,6 +71,8 @@
     align-items: center;
     justify-content: space-between;
 }
+
+  
 .chats__footer >form{
     flex: 1;
     display: flex;

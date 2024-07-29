@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { IconButton, Avatar, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button, List, ListItem, ListItemText, ListItemSecondaryAction } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
-import RefreshIcon from '@mui/icons-material/Refresh';
+import HomeIcon from '@mui/icons-material/Home';
 import SearchIcon from '@mui/icons-material/Search';
 import SideBarChat from './SideBarChat/SideBarChat';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import LogoutIcon from '@mui/icons-material/Logout';
 import FriendRequestsIcon from '@mui/icons-material/GroupAdd';
-import './SideBar.css';
 import db from '../../firebase';
 import { collection, getDocs, addDoc, onSnapshot, query, where, updateDoc, doc } from 'firebase/firestore';
 import { useStateValue } from '../StateProvider';
 import { actionTypes } from '../reducer';
 import { useNavigate } from 'react-router-dom';
 import FriendRequests from '../FriendRequest/FriendRequest';
+import './SideBar.css';
 
 function SideBar() {
   const navigate = useNavigate();
@@ -23,22 +23,28 @@ function SideBar() {
   const [email, setEmail] = useState('');
   const [friends, setFriends] = useState([]);
   const [friendRequests, setFriendRequests] = useState([]);
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); 
   const [{ user }, dispatch] = useStateValue();
+  const [searchInput, setSearchInput] = useState('')
 
   useEffect(() => {
+    let unsubscribeFriends;
     if (user) {
-      const fetchFriends = async () => {
+      const fetchFriends = () => {
         const q = query(collection(db, 'friends'), where('userEmail', '==', user.email));
-        const querySnapshot = await getDocs(q);
-        const friendEmails = querySnapshot.docs.map(doc => doc.data().friendEmail);
-
-        if (friendEmails.length > 0) {
-          const usersQuery = query(collection(db, 'users'), where('email', 'in', friendEmails));
-          const usersSnapshot = await getDocs(usersQuery);
-          const friendsList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-          setFriends(friendsList);
-        }
+        unsubscribeFriends = onSnapshot(q, async (querySnapshot) => {
+          const friendEmails = querySnapshot.docs.map(doc => doc.data().friendEmail);
+          
+          if (friendEmails.length > 0) {
+            const usersQuery = query(collection(db, 'users'), where('email', 'in', friendEmails));
+            const usersSnapshot = await getDocs(usersQuery);
+            const friendsList = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            console.log(friendsList, "friendsList");
+            setFriends(friendsList);
+          } else {
+            setFriends([]);
+          }
+        });
       };
 
       const fetchFriendRequests = async () => {
@@ -51,6 +57,12 @@ function SideBar() {
       fetchFriends();
       fetchFriendRequests();
     }
+    return () => {
+      if (unsubscribeFriends) {
+        unsubscribeFriends();
+      }
+    }
+    
   }, [user]);
 
   const handleAddPersonClick = () => {
@@ -119,7 +131,6 @@ function SideBar() {
       const requestDoc = doc(db, 'friend_requests', request.id);
       await updateDoc(requestDoc, { status: 'accepted' });
       setFriendRequests(friendRequests.filter(req => req.id !== request.id));
-      setFriends([...friends, { email: request.senderEmail }]);
     } catch (error) {
       console.error('Error accepting friend request: ', error);
     }
@@ -134,7 +145,7 @@ function SideBar() {
     }
   };
   
-
+// Sign out
   const handleLogout = () => {
     localStorage.removeItem('user');
     dispatch({
@@ -142,26 +153,34 @@ function SideBar() {
     });
     navigate('/');
   };
-
+// Search User
+  const handleSearch = friends.filter(friend =>{
+    if (searchInput){
+      if(friend.fullName.toLowerCase().includes(searchInput.toLowerCase())){
+        return user
+      }
+    }
+  });
+    
   return (
     <div className='sidebar'>
       <div className='sidebar__header'>
         <Avatar src={user ? user.photoURL : ''} />
         <div className='sidebar__header__icons'>
           <IconButton>
-            <ChatIcon className='sidebar__header__icon' />
+            <HomeIcon className='sidebar__header__icon' />
           </IconButton>
           <IconButton>
-            <RefreshIcon className='sidebar__header__icon' />
+            <ChatIcon className='sidebar__header__icon' />
           </IconButton>
           <IconButton onClick={handleAddPersonClick}>
             <PersonAddIcon className='sidebar__header__icon' />
           </IconButton>
-          <IconButton onClick={handleLogoutClick}>
-            <LogoutIcon className='sidebar__header__icon' />
-          </IconButton>
           <IconButton onClick={handleFriendRequestsClick}>
             <FriendRequestsIcon className='sidebar__header__icon' />
+          </IconButton>
+          <IconButton onClick={handleLogoutClick}>
+            <LogoutIcon className='sidebar__header__icon' />
           </IconButton>
         </div>
       </div>
@@ -169,10 +188,10 @@ function SideBar() {
         <IconButton>
           <SearchIcon />
         </IconButton>
-        <input type='text' placeholder='Search or start new chat' />
+        <input type='text' placeholder='Search friend' value={searchInput} onChange={e => setSearchInput(e.target.value)}/>
       </div>
       <div className='sidebar__chats'>
-        <SideBarChat friends={friends} />
+        <SideBarChat friends={friends} handleSearch={handleSearch} />
       </div>
 
       <Dialog open={openDialog} onClose={handleCloseDialog}>
